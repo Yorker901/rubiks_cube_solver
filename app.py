@@ -80,10 +80,7 @@
 
 import streamlit as st
 import gym
-from stable_baselines3 import DQN
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
 
 # Custom environment
 class SimpleRubiksCubeEnv(gym.Env):
@@ -103,44 +100,32 @@ class SimpleRubiksCubeEnv(gym.Env):
         self.state = np.random.randint(0, 6, 54)
         return self.state, reward, done, {}
 
-# Function to convert cube state to color representation
-def state_to_colors(state):
-    colors = {
-        0: "red",      # Red
-        1: "orange",   # Orange
-        2: "yellow",   # Yellow
-        3: "green",    # Green
-        4: "blue",     # Blue
-        5: "white"     # White
-    }
-    return [colors[x] for x in state]
+    def render(self, mode='human'):
+        return self.state.reshape((6, 9))
 
 # Load the model
-model = DQN.load("dqn_rubikscube")
+model = None  # Replace with your model loading code
 
-# Create the environment
-env = SimpleRubiksCubeEnv()
+# Function to convert state to colors
+def state_to_colors(state):
+    colors = ['W', 'G', 'R', 'B', 'O', 'Y']
+    color_state = []
+    for i in range(54):
+        color_state.append(colors[state[i]])
+    return color_state
 
 # Function to solve the Rubik's Cube
 def solve_cube():
     obs = env.reset()
     done = False
     steps = 0
+    st.write("Solving the Rubik's Cube...")
     while not done:
         action, _states = model.predict(obs)
         obs, rewards, done, info = env.step(action)
         steps += 1
         cube_colors = state_to_colors(env.render())
-        fig, ax = plt.subplots(3, 3, figsize=(6, 6))
-        for i in range(9):
-            face_colors = cube_colors[i*6:i*6+9]
-            for j, color in enumerate(face_colors):
-                row = j // 3
-                col = j % 3
-                ax[row, col].add_patch(Rectangle((col * 0.3, 0.3 - row * 0.3), 0.3, 0.3, color=color))
-                ax[row, col].axis('off')
-        st.write(fig)
-        plt.close(fig)
+        st.write(f"Step {steps}: {cube_colors}")
         if steps > 100:
             st.write("Exceeded maximum steps")
             break
@@ -148,19 +133,5 @@ def solve_cube():
 
 # Streamlit app
 st.title("Rubik's Cube Solver")
-st.write("Welcome to the Rubik's Cube Solver! This app uses a reinforcement learning model to solve a simplified version of the Rubik's Cube. Click the button below to see the AI in action.")
 if st.button("Solve Rubik's Cube"):
     solve_cube()
-
-# Additional information about the solver
-st.subheader("About the Solver")
-st.write("This solver is based on a Deep Q-Network (DQN) model trained to find the optimal sequence of moves to solve a simplified Rubik's Cube.")
-st.subheader("How It Works")
-st.write("""
-- **Environment**: The cube is represented as a 54-element array, each element indicating the color of a square.
-- **Actions**: There are 12 possible moves (e.g., rotating a face of the cube).
-- **Rewards**: The model receives a reward for each move, guiding it to find the optimal solution.
-""")
-st.subheader("Model Training")
-st.write("The model was trained using the Stable Baselines3 library, which provides implementations of various reinforcement learning algorithms.")
-st.write("Note: This is a simplified demonstration. Solving a real Rubik's Cube would require a more complex model and state representation.")
