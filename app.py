@@ -12,9 +12,9 @@ model = DQN.load("rubiks_cube_model")
 class RubiksCubeEnv(gym.Env):
     # Define the environment as shown in the previous example
 
-# Function to convert cube state to color representation
-def state_to_colors(state):
-    # Define the color mapping as shown in the previous example
+    # Function to convert cube state to color representation
+    def state_to_colors(state):
+        # Define the color mapping as shown in the previous example
 
 # Function to solve the Rubik's Cube using the trained model
 def solve_cube():
