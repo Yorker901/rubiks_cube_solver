@@ -1,0 +1,4 @@
+streamlit
+gym
+stable-baselines3
+numpy
