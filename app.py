@@ -8,7 +8,7 @@ class SimpleRubiksCubeEnv(gym.Env):
     def __init__(self):
         super(SimpleRubiksCubeEnv, self).__init__()
         self.action_space = gym.spaces.Discrete(12)
-        self.observation_space = gym.spaces.Box(low=0, high=1, shape=(54,), dtype=int)
+        self.observation_space = gym.spaces.Box(low=0, high=5, shape=(54,), dtype=int)
         self.state = np.zeros(54, dtype=int)
 
     def reset(self):
@@ -22,9 +22,19 @@ class SimpleRubiksCubeEnv(gym.Env):
         return self.state, reward, done, {}
 
     def render(self, mode='human'):
-        state_2d = self.state.reshape((6, 9))
-        display_str = '\n'.join([' '.join(map(str, row)) for row in state_2d])
-        return display_str
+        return self.state
+
+# Function to convert cube state to color representation
+def state_to_colors(state):
+    colors = {
+        0: "🟥",  # Red
+        1: "🟧",  # Orange
+        2: "🟨",  # Yellow
+        3: "🟩",  # Green
+        4: "🟦",  # Blue
+        5: "⬜"   # White
+    }
+    return ''.join([colors[x] for x in state])
 
 # Load the model
 model = DQN.load("dqn_rubikscube")
@@ -37,43 +47,32 @@ def solve_cube():
     obs = env.reset()
     done = False
     steps = 0
-    max_steps = 100
     st.write("Solving the Rubik's Cube...")
-
-    progress_bar = st.progress(0)
     while not done:
         action, _states = model.predict(obs)
         obs, rewards, done, info = env.step(action)
         steps += 1
-        st.write(f"Step {steps}:\n{env.render()}")
-        progress_bar.progress(steps / max_steps)
-        if steps > max_steps:
+        st.write(f"Step {steps}: {state_to_colors(env.render())}")
+        if steps > 100:
             st.write("Exceeded maximum steps")
             break
     st.write("Solved!")
 
 # Streamlit app
 st.title("Rubik's Cube Solver")
-st.markdown("""
-Welcome to the Rubik's Cube Solver! This app uses a reinforcement learning model to solve a simplified version of the Rubik's Cube.
-Click the button below to see the AI in action.
-""")
-
+st.write("Welcome to the Rubik's Cube Solver! This app uses a reinforcement learning model to solve a simplified version of the Rubik's Cube. Click the button below to see the AI in action.")
 if st.button("Solve Rubik's Cube"):
     solve_cube()
 
-st.markdown("""
-## About the Solver
-This solver is based on a Deep Q-Network (DQN) model trained to find the optimal sequence of moves to solve a simplified Rubik's Cube.
-
-### How It Works
+# Additional information about the solver
+st.subheader("About the Solver")
+st.write("This solver is based on a Deep Q-Network (DQN) model trained to find the optimal sequence of moves to solve a simplified Rubik's Cube.")
+st.subheader("How It Works")
+st.write("""
 - **Environment**: The cube is represented as a 54-element array, each element indicating the color of a square.
 - **Actions**: There are 12 possible moves (e.g., rotating a face of the cube).
 - **Rewards**: The model receives a reward for each move, guiding it to find the optimal solution.
-
-### Model Training
-The model was trained using the Stable Baselines3 library, which provides implementations of various reinforcement learning algorithms.
-
-**Note**: This is a simplified demonstration. Solving a real Rubik's Cube would require a more complex model and state representation.
 """)
-
+st.subheader("Model Training")
+st.write("The model was trained using the Stable Baselines3 library, which provides implementations of various reinforcement learning algorithms.")
+st.write("Note: This is a simplified demonstration. Solving a real Rubik's Cube would require a more complex model and state representation.")
