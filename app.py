@@ -142,7 +142,7 @@ def solve_cube():
             x = i % 3
             y = (i // 3) % 3
             z = i // 9
-            ax.add('cube', color=cube_colors[i], edgecolor='black', position=(x, y, z))
+            ax.scatter(x, y, z, color=cube_colors[i], edgecolor='black')
         st.write(fig)
         plt.close(fig)
         if steps > 100:
