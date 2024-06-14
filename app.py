@@ -106,6 +106,9 @@ class SimpleRubiksCubeEnv(gym.Env):
 # Load the model
 model = None  # Replace with your model loading code
 
+# Create the environment
+env = SimpleRubiksCubeEnv()
+
 # Function to convert state to colors
 def state_to_colors(state):
     colors = ['W', 'G', 'R', 'B', 'O', 'Y']
@@ -130,6 +133,12 @@ def solve_cube():
             st.write("Exceeded maximum steps")
             break
     st.write("Solved!")
+
+# Streamlit app
+st.title("Rubik's Cube Solver")
+if st.button("Solve Rubik's Cube"):
+    solve_cube()
+
 
 # Streamlit app
 st.title("Rubik's Cube Solver")
