@@ -83,7 +83,7 @@ import gym
 from stable_baselines3 import DQN
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.patches import Rectangle
 
 # Custom environment
 class SimpleRubiksCubeEnv(gym.Env):
@@ -102,9 +102,6 @@ class SimpleRubiksCubeEnv(gym.Env):
         done = np.random.rand() > 0.95
         self.state = np.random.randint(0, 6, 54)
         return self.state, reward, done, {}
-
-    def render(self, mode='human'):
-        return self.state
 
 # Function to convert cube state to color representation
 def state_to_colors(state):
@@ -134,15 +131,14 @@ def solve_cube():
         obs, rewards, done, info = env.step(action)
         steps += 1
         cube_colors = state_to_colors(env.render())
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.set_title(f"Step {steps}")
-        ax.set_axis_off()
-        for i in range(54):
-            x = i % 3
-            y = (i // 3) % 3
-            z = i // 9
-            ax.scatter(x, y, z, color=cube_colors[i], edgecolor='black')
+        fig, ax = plt.subplots(3, 3, figsize=(6, 6))
+        for i in range(9):
+            face_colors = cube_colors[i*6:i*6+9]
+            for j, color in enumerate(face_colors):
+                row = j // 3
+                col = j % 3
+                ax[row, col].add_patch(Rectangle((col * 0.3, 0.3 - row * 0.3), 0.3, 0.3, color=color))
+                ax[row, col].axis('off')
         st.write(fig)
         plt.close(fig)
         if steps > 100:
